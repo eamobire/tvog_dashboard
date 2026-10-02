@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TVOG Ops Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#FBF6F1; --bg-elevated:#FFFFFF; --ink:#201512; --ink-soft:#5B4A45;
+    --red:#E12A26; --red-deep:#8A1616; --gold:#B9812A; --line:#E8DAD2;
+    --red-tint:#FBEBEA; --gold-tint:#F7EFDF;
+    --green:#3E7A4C; --green-tint:#EAF3EC;
+    --amber:#B9812A; --amber-tint:#F7EFDF;
+    --gray:#8A7C76; --gray-tint:#F0EAE5;
+    --shadow: 0 1px 2px rgba(32,21,18,.06), 0 6px 20px rgba(32,21,18,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17110F; --bg-elevated:#221A17; --ink:#F5EAE4; --ink-soft:#C9B6AE;
+      --red:#FF534B; --red-deep:#E2544D; --gold:#E0AC4E; --line:#3A2C27;
+      --red-tint:#2C1512; --gold-tint:#2C2213;
+      --green:#6FBE85; --green-tint:#173323; --amber:#E0AC4E; --amber-tint:#2C2213;
+      --gray:#9C8F89; --gray-tint:#2A211D;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17110F; --bg-elevated:#221A17; --ink:#F5EAE4; --ink-soft:#C9B6AE;
+    --red:#FF534B; --red-deep:#E2544D; --gold:#E0AC4E; --line:#3A2C27;
+    --red-tint:#2C1512; --gold-tint:#2C2213;
+    --green:#6FBE85; --green-tint:#173323; --amber:#E0AC4E; --amber-tint:#2C2213;
+    --gray:#9C8F89; --gray-tint:#2A211D;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  html{color-scheme:light dark;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Work Sans',ui-sans-serif,system-ui,sans-serif; padding-inline:20px; -webkit-font-smoothing:antialiased;}
+  img{max-width:100%;} [hidden]{display:none!important;}
+  .wrap{max-width:980px; margin:0 auto;}
+  h1,h2,h3{font-family:'Anton',ui-sans-serif,sans-serif; font-weight:400; text-wrap:balance; margin:0;}
+  p{line-height:1.6; margin:0;}
+  a{color:inherit;}
+
+  .topnav{position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:16px; padding-block:14px;
+    background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(6px); border-bottom:1px solid var(--line);
+    margin-inline:-20px; padding-inline:20px; overflow-x:auto;}
+  .topnav .brandmini{display:flex; align-items:center; gap:8px; font-family:'Anton'; font-size:14px; letter-spacing:.04em; white-space:nowrap; color:var(--red-deep);}
+  .topnav .dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;}
+  .topnav nav{display:flex; gap:2px; margin-left:auto;}
+  .topnav a{font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:6px; white-space:nowrap;}
+  .topnav a:hover{color:var(--ink); background:var(--red-tint);}
+
+  .hero{background:var(--ink); margin-inline:-20px; padding-inline:20px; padding-block:40px 32px;}
+  .hero .in{max-width:980px; margin:0 auto;}
+  .eyebrow{color:var(--gold); font-size:12.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px; display:block;}
+  .hero h1{color:#FBF6F1; font-size:clamp(26px,4vw,38px); line-height:1.08; max-width:22ch;}
+  .hero p{color:#D9C9C2; margin-top:12px; font-size:15px; max-width:62ch;}
+  .sync-banner{margin-top:18px; display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:100px; padding:8px 16px; font-size:12.5px; color:#E8DAD2;}
+  .sync-banner .sdot{width:7px;height:7px;border-radius:50%;background:var(--gold); flex:none;}
+  .sync-banner.err{border-color:rgba(255,120,110,.4); color:#FFD9D6;}
+  .sync-banner.err .sdot{background:var(--red);}
+
+  section{padding-block:44px; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .kicker{font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--red-deep); margin-bottom:8px; display:block;}
+  section h2{font-size:clamp(20px,2.8vw,26px); margin-bottom:12px;}
+  .lede{color:var(--ink-soft); font-size:14.5px; max-width:66ch; margin-bottom:24px;}
+
+  .loading{color:var(--ink-soft); font-size:14px; padding:24px 0;}
+  .error-box{border:1px solid var(--line); background:var(--red-tint); border-radius:12px; padding:18px 20px; font-size:13.5px; color:var(--ink-soft);}
+  .error-box code{background:var(--bg-elevated); padding:2px 6px; border-radius:4px; font-size:12.5px;}
+
+  .summary-strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:12px;}
+  .stat-tile{background:var(--bg-elevated); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow);}
+  .stat-tile .v{font-family:'Anton'; font-size:26px; line-height:1;}
+  .stat-tile .l{font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; margin-top:6px;}
+  .status-bar{display:flex; height:14px; border-radius:7px; overflow:hidden; border:1px solid var(--line); margin:18px 0 10px;}
+  .status-bar span{height:100%;}
+  .status-legend{display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--ink-soft);}
+  .status-legend .sw{display:inline-flex; align-items:center; gap:6px;}
+  .status-legend .chip{width:9px;height:9px;border-radius:50%;}
+
+  .table-wrap{overflow-x:auto;}
+  .dept-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .dept-table th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); padding:0 12px 10px 0; border-bottom:1px solid var(--line);}
+  .dept-table td{padding:12px 12px 12px 0; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.5;}
+  .dept-table tr:last-child td{border-bottom:none;}
+  .dept-table .role{font-weight:700;}
+  .pill-tbd{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:100px; background:var(--gold-tint); color:#7A5A17; margin-left:6px; white-space:nowrap;}
+
+  .dept-group{margin-bottom:26px;}
+  .dept-group h3{font-family:'Work Sans'; font-weight:700; font-size:15px; margin-bottom:10px;}
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;}
+  .kpi-card{background:var(--bg-elevated); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow);}
+  .kpi-card .kpi-name{font-size:13.5px; font-weight:600; line-height:1.4; margin-bottom:10px;}
+  .kpi-row{display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; margin-bottom:4px;}
+  .kpi-row .l{color:var(--ink-soft);}
+  .kpi-row .v{font-weight:600; font-variant-numeric:tabular-nums; text-align:right;}
+  .status-pill{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.03em; padding:3px 9px; border-radius:100px; margin-top:8px;}
+  .status-pill.on-track{background:var(--green-tint); color:var(--green);}
+  .status-pill.at-risk{background:var(--amber-tint); color:var(--amber);}
+  .status-pill.behind{background:var(--red-tint); color:var(--red-deep);}
+  .status-pill.done{background:var(--green-tint); color:var(--green);}
+  .status-pill.pending{background:var(--gray-tint); color:var(--gray);}
+
+  .steps{counter-reset:step;}
+  .step{display:flex; gap:14px; padding-block:14px; border-top:1px solid var(--line);}
+  .step:first-child{border-top:none;}
+  .step .idx{counter-increment:step; font-family:'Anton'; font-size:15px; color:var(--red); flex:none; width:24px;}
+  .step .idx::before{content: counter(step);}
+  .step h4{font-family:'Work Sans'; font-weight:700; font-size:14px; margin-bottom:3px;}
+  .step p{font-size:13px; color:var(--ink-soft);}
+  .step .who{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--red-deep); margin-top:5px; display:block;}
+
+  footer{padding-block:32px 56px;}
+  footer p{font-size:12px; color:var(--ink-soft); max-width:60ch; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="brandmini"><span class="dot"></span> TVOG OPS DASHBOARD</div>
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#structure">Structure</a>
+    <a href="#kpis">KPIs</a>
+    <a href="#next">Next steps</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="in">
+    <span class="eyebrow">Live Visibility &middot; v1</span>
+    <h1>WHAT'S MOVING, AT A GLANCE.</h1>
+    <p>Structure, KPI targets vs. actuals, and next steps for TVOG's operations &mdash; reading live from the TVOG Ops Google Sheets.</p>
+    <div class="sync-banner" id="sync-banner"><span class="sdot"></span><span id="sync-text">Loading data&hellip;</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="overview">
+    <span class="kicker">Overview</span>
+    <h2>Reporting completeness</h2>
+    <p class="lede">How much of the tracker is actually filled in with real numbers right now, not just set up.</p>
+    <div id="overview-content"><div class="loading">Loading&hellip;</div></div>
+  </section>
+
+  <section id="structure">
+    <span class="kicker">Structure</span>
+    <h2>Who runs what</h2>
+    <p class="lede">Each function, with one name attached &mdash; or flagged where there isn't one yet.</p>
+    <div id="structure-content"><div class="loading">Loading&hellip;</div></div>
+  </section>
+
+  <section id="kpis">
+    <span class="kicker">KPIs</span>
+    <h2>Target vs. actual, by department</h2>
+    <p class="lede">Fill in Actual and Status on the KPIs sheet and this page picks it up on the next load.</p>
+    <div id="kpi-content"><div class="loading">Loading&hellip;</div></div>
+  </section>
+
+  <section id="next">
+    <span class="kicker">Next steps</span>
+    <h2>Where to start</h2>
+    <div id="next-content"><div class="loading">Loading&hellip;</div></div>
+  </section>
+
+  <footer>
+    <p>Reads live from the TVOG Ops Google Sheets via a small Apps Script endpoint. Edit the sheets, reload this page, see the change &mdash; no republish needed.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // EDIT THIS LINE: open this file in a text editor (Notepad, TextEdit, VS
+  // Code, etc.) -- NOT by double-clicking it, which opens it in a browser
+  // instead and won't let you edit anything. Then replace the text between
+  // the quotes below with your Apps Script Web App URL (ends in /exec)
+  // after deploying Code.gs.
+  const API_URL = "https://script.google.com/macros/s/AKfycbzsAN6jFkaP7ErRU1T6tQ0q5l4mEWM3ZtCrCRvXLXzBjopQuypzahQw_QCCAl2KPUtXHg/exec";
+
+  const STATUS_META = {
+    "On Track": {cls:"on-track"}, "At Risk": {cls:"at-risk"},
+    "Behind": {cls:"behind"}, "Done": {cls:"done"},
+  };
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function setSync(text, isError){
+    const banner = document.getElementById('sync-banner');
+    document.getElementById('sync-text').textContent = text;
+    banner.classList.toggle('err', !!isError);
+  }
+
+  function renderOverview(kpis){
+    const host = document.getElementById('overview-content');
+    if (!kpis || !kpis.length){ host.innerHTML = '<div class="loading">No KPI data yet.</div>'; return; }
+    const total = kpis.length;
+    const reported = kpis.filter(k => k.actual).length;
+    const counts = {"On Track":0,"At Risk":0,"Behind":0,"Done":0};
+    kpis.forEach(k => { if (k.status && counts.hasOwnProperty(k.status)) counts[k.status]++; });
+    const pending = total - Object.values(counts).reduce((a,b)=>a+b,0);
+
+    let html = '<div class="summary-strip">';
+    html += `<div class="stat-tile"><div class="v">${total}</div><div class="l">KPIs tracked</div></div>`;
+    html += `<div class="stat-tile"><div class="v">${reported}</div><div class="l">Reporting actuals</div></div>`;
+    html += `<div class="stat-tile"><div class="v">${total - reported}</div><div class="l">Awaiting data</div></div>`;
+    html += '</div>';
+
+    html += '<div class="status-bar">';
+    const segs = [
+      {n:counts["On Track"]+counts["Done"], color:"var(--green)"},
+      {n:counts["At Risk"], color:"var(--amber)"},
+      {n:counts["Behind"], color:"var(--red)"},
+      {n:pending, color:"var(--gray)"},
+    ];
+    segs.forEach(s => { if (s.n > 0) html += `<span style="width:${(s.n/total*100).toFixed(1)}%; background:${s.color};"></span>`; });
+    html += '</div>';
+    html += `<div class="status-legend">
+      <span class="sw"><span class="chip" style="background:var(--green);"></span>On track / done</span>
+      <span class="sw"><span class="chip" style="background:var(--amber);"></span>At risk</span>
+      <span class="sw"><span class="chip" style="background:var(--red);"></span>Behind</span>
+      <span class="sw"><span class="chip" style="background:var(--gray);"></span>Awaiting data</span>
+    </div>`;
+    host.innerHTML = html;
+  }
+
+  function renderStructure(departments){
+    const host = document.getElementById('structure-content');
+    if (!departments || !departments.length){ host.innerHTML = '<div class="loading">No structure data yet.</div>'; return; }
+    let html = '<div class="table-wrap"><table class="dept-table"><tr><th>Function</th><th>Lead</th><th>Owns</th></tr>';
+    departments.forEach(d => {
+      const tbd = d.lead === 'TBD' || /informal/i.test(d.lead) ? '<span class="pill-tbd">needs owner</span>' : '';
+      html += `<tr><td class="role">${escapeHtml(d.name)}</td><td>${escapeHtml(d.lead)}${tbd}</td><td>${escapeHtml(d.owns)}</td></tr>`;
+    });
+    html += '</table></div>';
+    host.innerHTML = html;
+  }
+
+  function renderKpis(kpis){
+    const host = document.getElementById('kpi-content');
+    if (!kpis || !kpis.length){ host.innerHTML = '<div class="loading">No KPI data yet.</div>'; return; }
+    const byDept = {};
+    kpis.forEach(k => { (byDept[k.department] = byDept[k.department] || []).push(k); });
+    let html = '';
+    Object.keys(byDept).forEach(dept => {
+      html += `<div class="dept-group"><h3>${escapeHtml(dept)}</h3><div class="kpi-grid">`;
+      byDept[dept].forEach(k => {
+        const meta = STATUS_META[k.status];
+        const pillCls = meta ? meta.cls : 'pending';
+        const pillLabel = k.status || 'Awaiting data';
+        html += `<div class="kpi-card">
+          <div class="kpi-name">${escapeHtml(k.kpi)}</div>
+          <div class="kpi-row"><span class="l">Target</span><span class="v">${escapeHtml(k.target)}</span></div>
+          <div class="kpi-row"><span class="l">Actual</span><span class="v">${escapeHtml(k.actual || '—')}</span></div>
+          <div class="kpi-row"><span class="l">Frequency</span><span class="v">${escapeHtml(k.frequency)}</span></div>
+          <span class="status-pill ${pillCls}">${escapeHtml(pillLabel.toUpperCase ? pillLabel.toUpperCase() : pillLabel)}</span>
+        </div>`;
+      });
+      html += '</div></div>';
+    });
+    host.innerHTML = html;
+  }
+
+  function renderNext(steps){
+    const host = document.getElementById('next-content');
+    if (!steps || !steps.length){ host.innerHTML = '<div class="loading">No next steps yet.</div>'; return; }
+    let html = '<div class="steps">';
+    steps.forEach(s => {
+      html += `<div class="step"><span class="idx"></span><div><h4>${escapeHtml(s.title)}</h4><p>${escapeHtml(s.detail)}</p><span class="who">Owner: ${escapeHtml(s.owner)}</span></div></div>`;
+    });
+    html += '</div>';
+    host.innerHTML = html;
+  }
+
+  async function boot(){
+    if (!API_URL || API_URL.indexOf('PASTE_YOUR') === 0){
+      setSync('Set API_URL at the top of the script to your Apps Script Web App URL', true);
+      document.getElementById('overview-content').innerHTML =
+        '<div class="error-box">This page has no data source configured yet. Deploy <code>Code.gs</code> as a Web App, copy its URL, and paste it into the <code>API_URL</code> constant near the bottom of this file.</div>';
+      return;
+    }
+    try {
+      const res = await fetch(API_URL, {cache: 'no-store'});
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      setSync(`Synced from Google Sheets · ${data.meta && data.meta.lastSynced ? data.meta.lastSynced : ''}`);
+      renderOverview(data.kpis || []);
+      renderStructure(data.departments || []);
+      renderKpis(data.kpis || []);
+      renderNext(data.nextSteps || []);
+    } catch (err) {
+      setSync("Couldn't reach the data source", true);
+      document.getElementById('overview-content').innerHTML =
+        '<div class="error-box">Could not load data from the Apps Script endpoint. Check that it\'s deployed, the URL in <code>API_URL</code> is correct (ends in <code>/exec</code>), and access is set to "Anyone". Error: ' + escapeHtml(err.message) + '</div>';
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
