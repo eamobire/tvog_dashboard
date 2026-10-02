@@ -1,0 +1,44 @@
+name: Deploy Apps Script
+
+# Pushes apps-script/Code.gs (and appsscript.json) to the TVOG Web App
+# Apps Script project, then updates the existing deployment in place so
+# the live /exec URL never changes. Runs automatically whenever anything
+# under apps-script/ changes on main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps-script/**'
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Write clasp credentials
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: echo "$CLASPRC_JSON" > ~/.clasprc.json
+
+      - name: Push code to Apps Script
+        working-directory: apps-script
+        run: clasp push -f
+
+      - name: Deploy (updates the existing deployment, same /exec URL)
+        working-directory: apps-script
+        run: |
+          clasp deploy \
+            -i AKfycbzsAN6jFkaP7ErRU1T6tQ0q5l4mEWM3ZtCrCRvXLXzBjopQuypzahQw_QCCAl2KPUtXHg \
+            -d "Auto-deploy from GitHub Actions ($(date -u +'%Y-%m-%d %H:%M UTC'))"
